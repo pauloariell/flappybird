@@ -2,6 +2,8 @@ console.log('Créditos ao DevSoutinho, Inscreva-se no canal dele')
 console.log('[DevSoutinho] Flappy Bird');
 console.log('Inscreva-se no canal :D https://www.youtube.com/channel/UCzR2u5RWXWjUh7CwLSvbitA');
 
+let frame = 0;
+
 const som_HIT = new Audio();
 som_HIT.src = './efeitos/hit.wav'
 
@@ -38,36 +40,45 @@ function crash(objectOne, objectTwo){
 }
 
 const globals = {};
-const background = {
-  spriteX: 390,
-  spriteY: 0,
-  spriteW: 275,
-  spriteH: 204,
-  canvasX: 0,
-  canvasY: canvas.height - 204,
-  canvasW: 275,
-  canvasH: 204,
-  draw() {
-    contexto.fillStyle = '#70c5ce';
-    contexto.fillRect(0, 0, canvas.width, canvas.height);
 
-    contexto.drawImage(
-      sprites,
-      background.spriteX, background.spriteY, // start position from sprites
-      background.spriteW, background.spriteH, // size from sprites
-      background.canvasX, background.canvasY, // start position from canvas
-      background.canvasW, background.canvasH, // size from canvas
-    );
-    contexto.drawImage(
-      sprites,
-      background.spriteX, background.spriteY, // start position from sprites
-      background.spriteW, background.spriteH, // size from sprites
-      background.canvasX+background.spriteW, background.canvasY, // start position from canvas
-      background.canvasW, background.canvasH, // size from canvas
-    );
+function createBackground(){
+  const background = {
+    spriteX: 390,
+    spriteY: 0,
+    spriteW: 275,
+    spriteH: 204,
+    canvasX: 0,
+    canvasY: canvas.height - 204,
+    canvasW: 275,
+    canvasH: 204,
+    update(){
+      const backgroundMoviment = 1;
+      const repeatMoviment = background.canvasW/2;
+      const moving = background.canvasX - backgroundMoviment;
+      background.canvasX = moving % repeatMoviment;
+    },
+    draw() {
+      contexto.fillStyle = '#70c5ce';
+      contexto.fillRect(0, 0, canvas.width, canvas.height);
+  
+      contexto.drawImage(
+        sprites,
+        background.spriteX, background.spriteY, // start position from sprites
+        background.spriteW, background.spriteH, // size from sprites
+        background.canvasX, background.canvasY, // start position from canvas
+        background.canvasW, background.canvasH, // size from canvas
+      );
+      contexto.drawImage(
+        sprites,
+        background.spriteX, background.spriteY, // start position from sprites
+        background.spriteW, background.spriteH, // size from sprites
+        background.canvasX+background.spriteW, background.canvasY, // start position from canvas
+        background.canvasW, background.canvasH, // size from canvas
+      );
+    }
   }
+  return background;
 }
-
 function createFloor(){
   const floor = {
     spriteX: 0,
@@ -79,7 +90,10 @@ function createFloor(){
     canvasW: 224,
     canvasH: 112,
     update(){
-
+      const floorMoviment = 1;
+      const repeatMoviment = floor.canvasW/2;
+      const moving = floor.canvasX - floorMoviment;
+      floor.canvasX = moving % repeatMoviment;
     },
     draw(){
       contexto.drawImage(
@@ -113,10 +127,31 @@ function createFlappyBird(){
     gravidade: 0.10,
     velocidade: 0,
     jump: 2.5,
+    currentFrame: 0,
+    flappybirds:[
+      {spriteX: 0, spriteY: 0},
+      {spriteX: 0, spriteY: 26},
+      {spriteX: 0, spriteY: 52}
+    ],
+    updateFrame(){
+      //animation flappyboard
+      const frameInterval = 10;
+      const limitInterval = frame % frameInterval === 0;
+      if(limitInterval) {
+        const flappyBirdMoviment = 1;
+        const moving = flappyBirdMoviment + flappyBird.currentFrame;
+        const repeatMoviment = flappyBird.flappybirds.length;
+        flappyBird.currentFrame = moving % repeatMoviment;
+      }
+    },
     draw(){
+      //const { spriteX, spriteY } = flappyBird.flappybirds[0];
+      //const { spriteX, spriteY } = flappyBird.flappybirds[1];
+      flappyBird.updateFrame()
+      const { spriteX, spriteY } = flappyBird.flappybirds[flappyBird.currentFrame];
       contexto.drawImage(
         sprites,
-        flappyBird.spriteX, flappyBird.spriteY, // start position from sprites
+        spriteX, spriteY, // start position from sprites
         flappyBird.spriteW, flappyBird.spriteH, // size from sprites
         flappyBird.canvasX, flappyBird.canvasY, // start position from canvas
         flappyBird.canvasW, flappyBird.canvasH, // size from canvas
@@ -162,17 +197,19 @@ const messageGetReady = {
 const telas = {
   INICIO:{
     inicialize(){
+      globals.background = createBackground()
       globals.floor = createFloor()
       globals.flappyBird = createFlappyBird()
     },
     draw(){
-      background.draw();
+      globals.background.draw();
       globals.floor.draw();
       globals.flappyBird.draw();
       messageGetReady.draw();
     },
     update(){
-
+      globals.floor.update();
+      globals.background.update();
     },
     click(){
       changeScreen(telas.JOGO);
@@ -180,11 +217,13 @@ const telas = {
   },
   JOGO: {
     draw(){
-      background.draw();
+      globals.background.draw();
       globals.floor.draw();
       globals.flappyBird.draw();
     },
     update(){
+      globals.floor.update();
+      globals.background.update();
       globals.flappyBird.update();
     },
     click(){
@@ -196,7 +235,7 @@ const telas = {
 function loop() {
   activeScreen.draw();
   activeScreen.update();
-
+  frame++;
   requestAnimationFrame(loop)
 };
 
