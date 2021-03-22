@@ -2,7 +2,7 @@ console.log('Créditos ao DevSoutinho, Inscreva-se no canal dele')
 console.log('[DevSoutinho] Flappy Bird');
 console.log('Inscreva-se no canal :D https://www.youtube.com/channel/UCzR2u5RWXWjUh7CwLSvbitA');
 
-let frame = 0;
+let frames = 0;
 
 const som_HIT = new Audio();
 som_HIT.src = './efeitos/hit.wav'
@@ -136,7 +136,7 @@ function createFlappyBird(){
     updateFrame(){
       //animation flappyboard
       const frameInterval = 10;
-      const limitInterval = frame % frameInterval === 0;
+      const limitInterval = frames % frameInterval === 0;
       if(limitInterval) {
         const flappyBirdMoviment = 1;
         const moving = flappyBirdMoviment + flappyBird.currentFrame;
@@ -172,7 +172,7 @@ function createFlappyBird(){
       som_JUMP.play();
     }
   }
-  return flappyBird
+  return flappyBird;
 }
 const messageGetReady = {
   spriteX: 134,
@@ -194,22 +194,107 @@ const messageGetReady = {
   }
 }
 
+function createPipeObstacles(){
+  const pipeObstacles = {
+    spriteW: 52,
+    spriteH: 400,
+    floor: {
+      spriteX: 0,
+      spriteY: 169,
+    },
+    sky: {
+      spriteX: 52,
+      spriteY: 169,
+    },
+    distance: 80,
+    pairs: [],
+    draw(){
+      pipeObstacles.pairs.forEach(function(pair){
+        const yRandom = -150;
+        const pipeDistance = 90;
+        // Sky pipe
+        const pipeSkyX = pair.x;
+        const pipeSkyY = pair.y;
+        contexto.drawImage(
+          sprites,
+          pipeObstacles.sky.spriteX, pipeObstacles.sky.spriteY, // start position from sprites
+          pipeObstacles.spriteW, pipeObstacles.spriteH, // size from sprites
+          pipeSkyX, pipeSkyY, // start position from canvas
+          pipeObstacles.spriteW, pipeObstacles.spriteH, // size from canvas
+        );
+        
+        // Floor pipe
+        const pipeFloorX = pair.x;
+        const pipeFloorY = pipeObstacles.spriteH + pipeDistance + pair.y ;
+        contexto.drawImage(
+          sprites,
+          pipeObstacles.floor.spriteX, pipeObstacles.floor.spriteY, // start position from sprites
+          pipeObstacles.spriteW, pipeObstacles.spriteH, // size from sprites
+          pipeFloorX, pipeFloorY, // start position from canvas
+          pipeObstacles.spriteW, pipeObstacles.spriteH, // size from canvas
+        );
+      });
+    },
+    update(){
+      const passed100Frames = frames % 100 == 0;
+      if (passed100Frames) {
+        // console.log('Passou 100 frames');
+        // draw  new pipe with new position
+        pipeObstacles.pairs.push({
+          x: canvas.width,
+          y: -150 * (Math.random() + 1),
+        })
+      }
+      pipeObstacles.pairs.forEach(function(pair){
+        pair.x-= 2;
+
+        if(pipeObstacles.isCollisionFlappyBird(pair)){
+          console.log(`You Lose`)
+        };
+
+        if (pair.x + pipeObstacles.spriteW <= 0 ) {
+          pipeObstacles.pairs.shift();
+        }
+      });
+    },
+    isCollisionFlappyBird(pair){
+      const flappyBirdHead = globals.flappyBird.spriteY;
+      const flappyBirdFoot = globals.flappyBird.spriteY + globals.flappyBird.spriteH;
+
+      if(globals.flappyBird.spriteX >= pair.x) {
+        console.log(`Flappy bird invadiu a área dos canos`);
+        if (flappyBirdHead <= pair.sky.spriteY) {
+          return true;
+        }
+        if (flappyBirdFoot <= pair.sky.spriteY) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+  return pipeObstacles;
+}
+
 const telas = {
   INICIO:{
     inicialize(){
       globals.background = createBackground()
       globals.floor = createFloor()
       globals.flappyBird = createFlappyBird()
+      globals.pipeObstacles = createPipeObstacles()
     },
     draw(){
       globals.background.draw();
-      globals.floor.draw();
       globals.flappyBird.draw();
-      messageGetReady.draw();
+      globals.pipeObstacles.draw();
+      globals.floor.draw();
+      // messageGetReady.draw();
     },
     update(){
       globals.floor.update();
       globals.background.update();
+      globals.pipeObstacles.update();
     },
     click(){
       changeScreen(telas.JOGO);
@@ -235,7 +320,7 @@ const telas = {
 function loop() {
   activeScreen.draw();
   activeScreen.update();
-  frame++;
+  frames++;
   requestAnimationFrame(loop)
 };
 
