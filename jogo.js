@@ -236,12 +236,12 @@ function createPipeObstacles(){
 
         pair.pipeSky = {
           x: pipeSkyX,
-          y: pipeObstacles.spriteH + pipeSkyY
-        }
+          y: pipeObstacles.spriteH + pipeSkyY,
+        };
         pair.pipeFloor = {
           x: pipeFloorX,
-          y: pipeFloorY
-        }
+          y: pipeFloorY,
+        };
       });
     },
     update(){
@@ -304,7 +304,7 @@ const telas = {
     update(){
       globals.floor.update();
       // globals.background.update();
-      globals.pipeObstacles.update();
+      // globals.pipeObstacles.update();
     },
     click(){
       changeScreen(telas.JOGO);
