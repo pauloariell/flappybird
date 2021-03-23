@@ -116,14 +116,14 @@ function createFloor(){
 }
 function createFlappyBird(){
   const flappyBird = {
-    spriteX: 0,
-    spriteY: 0,
-    spriteW: 33,
-    spriteH: 24,
-    canvasX: 10,
-    canvasY: 50,
-    canvasW: 33,
-    canvasH: 24,
+    spriteX: 0, // Position on sprites
+    spriteY: 0, // Position on sprites
+    spriteW: 33, // Size on sprites
+    spriteH: 24, // Size on sprites
+    canvasX: 10, // Position on screen when is draw
+    canvasY: 50, // Position on screen when is draw
+    canvasW: 33, // Position on screen when is draw
+    canvasH: 24, // Position on screen when is draw
     gravidade: 0.10,
     velocidade: 0,
     jump: 2.5,
@@ -233,6 +233,15 @@ function createPipeObstacles(){
           pipeFloorX, pipeFloorY, // start position from canvas
           pipeObstacles.spriteW, pipeObstacles.spriteH, // size from canvas
         );
+
+        pair.pipeSky = {
+          x: pipeSkyX,
+          y: pipeObstacles.spriteH + pipeSkyY
+        }
+        pair.pipeFloor = {
+          x: pipeFloorX,
+          y: pipeFloorY
+        }
       });
     },
     update(){
@@ -249,7 +258,9 @@ function createPipeObstacles(){
         pair.x-= 2;
 
         if(pipeObstacles.isCollisionFlappyBird(pair)){
-          console.log(`You Lose`)
+          console.log(`You Lose`);
+          changeScreen(telas.INICIO);
+          som_HIT.play();
         };
 
         if (pair.x + pipeObstacles.spriteW <= 0 ) {
@@ -258,15 +269,15 @@ function createPipeObstacles(){
       });
     },
     isCollisionFlappyBird(pair){
-      const flappyBirdHead = globals.flappyBird.spriteY;
-      const flappyBirdFoot = globals.flappyBird.spriteY + globals.flappyBird.spriteH;
+      const flappyBirdHead = globals.flappyBird.canvasY;
+      const flappyBirdFoot = globals.flappyBird.canvasY + globals.flappyBird.spriteH;
 
-      if(globals.flappyBird.spriteX >= pair.x) {
+      if(globals.flappyBird.canvasX >= pair.x) {
         console.log(`Flappy bird invadiu a área dos canos`);
-        if (flappyBirdHead <= pair.sky.spriteY) {
+        if (flappyBirdHead <= pair.pipeSky.y) {
           return true;
         }
-        if (flappyBirdFoot <= pair.sky.spriteY) {
+        if (flappyBirdFoot >= pair.pipeFloor.y) {
           return true;
         }
       }
@@ -287,13 +298,12 @@ const telas = {
     draw(){
       globals.background.draw();
       globals.flappyBird.draw();
-      globals.pipeObstacles.draw();
       globals.floor.draw();
-      // messageGetReady.draw();
+      messageGetReady.draw();
     },
     update(){
       globals.floor.update();
-      globals.background.update();
+      // globals.background.update();
       globals.pipeObstacles.update();
     },
     click(){
@@ -303,12 +313,14 @@ const telas = {
   JOGO: {
     draw(){
       globals.background.draw();
+      globals.pipeObstacles.draw();
       globals.floor.draw();
       globals.flappyBird.draw();
     },
     update(){
+      globals.pipeObstacles.update();
       globals.floor.update();
-      globals.background.update();
+      // globals.background.update();
       globals.flappyBird.update();
     },
     click(){
