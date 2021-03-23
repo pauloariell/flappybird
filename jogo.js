@@ -17,7 +17,7 @@ const sprites = new Image();
 sprites.src = './sprites.png';
 
 const canvas = document.querySelector('canvas');
-const contexto = canvas.getContext('2d');
+const context = canvas.getContext('2d');
 
 let activeScreen = {};
 function changeScreen(newScreen){
@@ -31,9 +31,10 @@ function crash(objectOne, objectTwo){
   const floorY = objectTwo.canvasY;
   
   if(flappyBirdY>=floorY){
-    setTimeout(() => {
-      changeScreen(telas.INICIO);
-    },500)
+    // setTimeout(() => {
+    //   changeScreen(telas.INICIO);
+    // },500)
+    changeScreen(telas.GAME_OVER);
     return true
   }
   return false;
@@ -51,31 +52,31 @@ function createBackground(){
     canvasY: canvas.height - 204,
     canvasW: 275,
     canvasH: 204,
-    update(){
-      const backgroundMoviment = 1;
-      const repeatMoviment = background.canvasW/2;
-      const moving = background.canvasX - backgroundMoviment;
-      background.canvasX = moving % repeatMoviment;
-    },
     draw() {
-      contexto.fillStyle = '#70c5ce';
-      contexto.fillRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = '#70c5ce';
+      context.fillRect(0, 0, canvas.width, canvas.height);
   
-      contexto.drawImage(
+      context.drawImage(
         sprites,
         background.spriteX, background.spriteY, // start position from sprites
         background.spriteW, background.spriteH, // size from sprites
         background.canvasX, background.canvasY, // start position from canvas
         background.canvasW, background.canvasH, // size from canvas
       );
-      contexto.drawImage(
+      context.drawImage(
         sprites,
         background.spriteX, background.spriteY, // start position from sprites
         background.spriteW, background.spriteH, // size from sprites
         background.canvasX+background.spriteW, background.canvasY, // start position from canvas
         background.canvasW, background.canvasH, // size from canvas
       );
-    }
+    },
+    update(){
+      const backgroundMoviment = 1;
+      const repeatMoviment = background.canvasW/2;
+      const moving = background.canvasX - backgroundMoviment;
+      background.canvasX = moving % repeatMoviment;
+    },
   }
   return background;
 }
@@ -89,28 +90,28 @@ function createFloor(){
     canvasY: canvas.height - 112,
     canvasW: 224,
     canvasH: 112,
-    update(){
-      const floorMoviment = 1;
-      const repeatMoviment = floor.canvasW/2;
-      const moving = floor.canvasX - floorMoviment;
-      floor.canvasX = moving % repeatMoviment;
-    },
     draw(){
-      contexto.drawImage(
+      context.drawImage(
         sprites,
         floor.spriteX, floor.spriteY, // start position from sprites
         floor.spriteW, floor.spriteH, // size from sprites
         floor.canvasX, floor.canvasY, // start position from canvas
         floor.canvasW, floor.canvasH, // size from canvas
       );
-      contexto.drawImage(
+      context.drawImage(
         sprites,
         floor.spriteX, floor.spriteY, // start position from sprites
         floor.spriteW, floor.spriteH, // size from sprites
         floor.canvasX+floor.spriteW, floor.canvasY, // start position from canvas
         floor.canvasW, floor.canvasH, // size from canvas
       );
-    }
+    },
+    update(){
+      const floorMoviment = 1;
+      const repeatMoviment = floor.canvasW/2;
+      const moving = floor.canvasX - floorMoviment;
+      floor.canvasX = moving % repeatMoviment;
+    }, 
   }
   return floor;
 }
@@ -133,23 +134,12 @@ function createFlappyBird(){
       {spriteX: 0, spriteY: 26},
       {spriteX: 0, spriteY: 52}
     ],
-    updateFrame(){
-      //animation flappyboard
-      const frameInterval = 10;
-      const limitInterval = frames % frameInterval === 0;
-      if(limitInterval) {
-        const flappyBirdMoviment = 1;
-        const moving = flappyBirdMoviment + flappyBird.currentFrame;
-        const repeatMoviment = flappyBird.flappybirds.length;
-        flappyBird.currentFrame = moving % repeatMoviment;
-      }
-    },
     draw(){
       //const { spriteX, spriteY } = flappyBird.flappybirds[0];
       //const { spriteX, spriteY } = flappyBird.flappybirds[1];
       flappyBird.updateFrame()
       const { spriteX, spriteY } = flappyBird.flappybirds[flappyBird.currentFrame];
-      contexto.drawImage(
+      context.drawImage(
         sprites,
         spriteX, spriteY, // start position from sprites
         flappyBird.spriteW, flappyBird.spriteH, // size from sprites
@@ -166,6 +156,17 @@ function createFlappyBird(){
       flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade
       flappyBird.canvasY = flappyBird.canvasY + flappyBird.velocidade;
       som_FALL.play();
+    },
+    updateFrame(){
+      //animation flappyboard
+      const frameInterval = 10;
+      const limitInterval = frames % frameInterval === 0;
+      if(limitInterval) {
+        const flappyBirdMoviment = 1;
+        const moving = flappyBirdMoviment + flappyBird.currentFrame;
+        const repeatMoviment = flappyBird.flappybirds.length;
+        flappyBird.currentFrame = moving % repeatMoviment;
+      }
     },
     jumping(){
       flappyBird.velocidade = - flappyBird.jump
@@ -184,12 +185,30 @@ const messageGetReady = {
   canvasW: 174,
   canvasH: 152,
   draw(){
-    contexto.drawImage(
+    context.drawImage(
       sprites,
       messageGetReady.spriteX, messageGetReady.spriteY, // start position from sprites
       messageGetReady.spriteW, messageGetReady.spriteH, // size from sprites
       messageGetReady.canvasX, messageGetReady.canvasY, // start position from canvas
       messageGetReady.canvasW, messageGetReady.canvasH, // size from canvas
+    );
+  }
+}
+
+const messageGameOver = {
+  spriteX: 134,
+  spriteY: 153,
+  spriteW: 226,
+  spriteH: 200,
+  canvasX: (canvas.width / 2) - 226 / 2,
+  canvasY: 50,
+  draw(){
+    context.drawImage(
+      sprites,
+      messageGameOver.spriteX, messageGameOver.spriteY, // start position from sprites
+      messageGameOver.spriteW, messageGameOver.spriteH, // size from sprites
+      messageGameOver.canvasX, messageGameOver.canvasY, // start position from canvas
+      messageGameOver.spriteW, messageGameOver.spriteH, // size from canvas
     );
   }
 }
@@ -215,7 +234,7 @@ function createPipeObstacles(){
         // Sky pipe
         const pipeSkyX = pair.x;
         const pipeSkyY = pair.y;
-        contexto.drawImage(
+        context.drawImage(
           sprites,
           pipeObstacles.sky.spriteX, pipeObstacles.sky.spriteY, // start position from sprites
           pipeObstacles.spriteW, pipeObstacles.spriteH, // size from sprites
@@ -226,7 +245,7 @@ function createPipeObstacles(){
         // Floor pipe
         const pipeFloorX = pair.x;
         const pipeFloorY = pipeObstacles.spriteH + pipeDistance + pair.y ;
-        contexto.drawImage(
+        context.drawImage(
           sprites,
           pipeObstacles.floor.spriteX, pipeObstacles.floor.spriteY, // start position from sprites
           pipeObstacles.spriteW, pipeObstacles.spriteH, // size from sprites
@@ -259,8 +278,8 @@ function createPipeObstacles(){
 
         if(pipeObstacles.isCollisionFlappyBird(pair)){
           console.log(`You Lose`);
-          changeScreen(telas.INICIO);
           som_HIT.play();
+          changeScreen(telas.GAME_OVER);
         };
 
         if (pair.x + pipeObstacles.spriteW <= 0 ) {
@@ -272,7 +291,7 @@ function createPipeObstacles(){
       const flappyBirdHead = globals.flappyBird.canvasY;
       const flappyBirdFoot = globals.flappyBird.canvasY + globals.flappyBird.spriteH;
 
-      if(globals.flappyBird.canvasX >= pair.x) {
+      if(globals.flappyBird.canvasX + globals.flappyBird.spriteW-5 >= pair.x) {
         console.log(`Flappy bird invadiu a área dos canos`);
         if (flappyBirdHead <= pair.pipeSky.y) {
           return true;
@@ -285,6 +304,27 @@ function createPipeObstacles(){
     }
   }
   return pipeObstacles;
+}
+
+function createScoreboard(){
+  const scoreboard = {
+    score: 0,
+    draw(){
+      context.font = "20px 'VT323'";
+      context.textAlign = 'right';
+      context.fillStyle = 'white';
+      context.fillText(`Score: ${padWithZeroes(scoreboard.score,7)}`, canvas.width - 10, 25);
+    },
+    update(){
+      const frameInterval = 10;
+      const limitInterval = frames % frameInterval === 0;
+      if(limitInterval) {
+        scoreboard.score+=1;
+      }
+    }
+  }
+
+  return scoreboard;
 }
 
 const telas = {
@@ -304,27 +344,42 @@ const telas = {
     update(){
       globals.floor.update();
       // globals.background.update();
-      // globals.pipeObstacles.update();
     },
     click(){
       changeScreen(telas.JOGO);
     }
   },
   JOGO: {
+    inicialize(){
+      globals.scoreboard = createScoreboard();
+    },
     draw(){
       globals.background.draw();
       globals.pipeObstacles.draw();
       globals.floor.draw();
       globals.flappyBird.draw();
+      globals.scoreboard.draw();
     },
     update(){
       globals.pipeObstacles.update();
       globals.floor.update();
       // globals.background.update();
       globals.flappyBird.update();
+      globals.scoreboard.update();
     },
     click(){
       globals.flappyBird.jumping();
+    }
+  },
+  GAME_OVER: {
+    draw(){
+      messageGameOver.draw();
+    },
+    update(){
+
+    },
+    click(){
+      changeScreen(telas.INICIO);
     }
   }
 }
@@ -335,6 +390,14 @@ function loop() {
   frames++;
   requestAnimationFrame(loop)
 };
+
+function padWithZeroes(number, length) {
+  var stringNumber = '' + number;
+  while (stringNumber.length < length) {
+    stringNumber = '0' + stringNumber;
+  }
+  return stringNumber;
+}
 
 window.addEventListener('click', function() {
   if (activeScreen.click) {
